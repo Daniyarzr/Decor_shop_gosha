@@ -1,0 +1,226 @@
+/* === СЕКЦИЯ ВСЕХ ОТЗЫВОВ === */
+.all-reviews {
+    padding: 80px 0;
+    background: #fff;
+}
+
+.all-reviews .section-header {
+    margin-bottom: 40px;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
+}
+
+.all-reviews .section-header h2 {
+    color: #2c3e50;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.all-reviews .section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 30px;
+    height: 4px;
+    background: #f25081; /* корпоративный розовый */
+    border-radius: 2px;
+}
+
+.all-reviews .section-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-top: 15px;
+    font-weight: 400;
+}
+
+/* === СЕТКА ОТЗЫВОВ === */
+.reviews-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* === КАРТОЧКА ОТЗЫВА === */
+.review-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.review-text {
+    font-style: italic;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+    flex-grow: 1;
+}
+
+/* === ФУТЕР ОТЗЫВА (автор + рейтинг) === */
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding-top: 10px;
+}
+
+.review-author {
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.review-author span {
+    font-size: 13px;
+    color: #888;
+    font-weight: 400;
+}
+
+.review-rating {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 70px; /* фиксированная ширина для выравнивания */
+}
+
+.review-rating .star {
+    color: #f25081;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.review-rating .star:not(.filled) {
+    color: #ddd;
+}
+
+/* === ПАГИНАЦИЯ === */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 16px;
+    color: #2c3e50;
+    background: #fff;
+    border: 2px solid #f25081;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(242, 80, 129, 0.1);
+    cursor: pointer;
+}
+
+.page-link:hover {
+    background: #f25081;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(242, 80, 129, 0.2);
+}
+
+/* === АКТИВНАЯ СТРАНИЦА (через скрытые радио-кнопки) === */
+.page-selector {
+    display: none;
+}
+
+#page1:checked ~ .pagination label[for="page1"],
+#page2:checked ~ .pagination label[for="page2"],
+#page3:checked ~ .pagination label[for="page3"] {
+    background: #f25081;
+    color: #fff;
+    border-color: #f25081;
+    box-shadow: 0 4px 10px rgba(242, 80, 129, 0.3);
+}
+
+/* === ПЕРЕКЛЮЧЕНИЕ КОНТЕНТА === */
+#page1:checked ~ .reviews-list #page1,
+#page2:checked ~ .reviews-list #page2,
+#page3:checked ~ .reviews-list #page3 {
+    display: grid !important;
+}
+
+#page1:checked ~ .reviews-list #page2,
+#page1:checked ~ .reviews-list #page3,
+#page2:checked ~ .reviews-list #page1,
+#page2:checked ~ .reviews-list #page3,
+#page3:checked ~ .reviews-list #page1,
+#page3:checked ~ .reviews-list #page2 {
+    display: none !important;
+}
+
+/* === АДАПТИВНОСТЬ === */
+@media (max-width: 768px) {
+    .all-reviews {
+        padding: 60px 0;
+    }
+
+    .reviews-list {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .review-text {
+        font-size: 14px;
+    }
+
+    .review-author {
+        font-size: 14px;
+    }
+
+    .review-author span {
+        font-size: 12px;
+    }
+
+    .review-rating .star {
+        font-size: 13px;
+    }
+
+    .pagination {
+        gap: 8px;
+    }
+
+    .page-link {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+}

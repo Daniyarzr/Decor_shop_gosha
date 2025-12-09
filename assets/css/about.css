@@ -1,0 +1,164 @@
+/* assets/css/about.css */
+
+/* Баннер */
+.about-hero {
+    background: linear-gradient(135deg, #f25081, #d93a6a);
+    padding: 60px 20px;
+    text-align: center;
+    color: white;
+}
+.about-hero h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+.about-hero p {
+    font-size: 18px;
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Миссия */
+.about-mission {
+    padding: 80px 20px;
+    background: #fafafa;
+}
+.about-mission .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.about-mission h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+}
+.mission-content {
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.mission-text {
+    flex: 1;
+    min-width: 300px;
+    line-height: 1.7;
+    color: #444;
+    font-size: 16px;
+}
+.mission-text p {
+    margin-bottom: 16px;
+}
+.mission-image {
+    flex: 0 0 320px;
+    text-align: center;
+}
+.mission-image img {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    border: 3px solid white;
+}
+
+/* Статистика — ТЕПЕРЬ РОЗОВАЯ (#f25081) */
+.about-stats {
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f25081, #d93a6a); /* ← РОЗОВЫЙ ГРАДИЕНТ */
+    border-radius: 20px;
+    color: white;
+    text-align: center;
+    margin: 40px auto;
+    max-width: 1200px;
+    box-shadow: 0 6px 20px rgba(242, 80, 129, 0.3); /* Лёгкая тень для объёма */
+}
+
+.about-stats .container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-item h3 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.stat-item p {
+    font-size: 14px;
+    opacity: 0.95;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Склад */
+.warehouse-section {
+    padding: 80px 20px;
+    background: white;
+    text-align: center;
+}
+.warehouse-section h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+}
+.warehouse-section p {
+    max-width: 700px;
+    margin: 0 auto 40px;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+.warehouse-image {
+    max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.warehouse-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .mission-content {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .mission-image {
+        flex: 0 0 auto;
+    }
+    .about-hero h1 {
+        font-size: 28px;
+    }
+    .about-mission h2,
+    .warehouse-section h2 {
+        font-size: 26px;
+    }
+    .about-stats {
+        margin: 30px 15px;
+    }
+    .stat-item h3 {
+        font-size: 36px;
+    }
+}
