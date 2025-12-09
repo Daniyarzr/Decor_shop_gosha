@@ -1,0 +1,88 @@
+# Включаем mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+</IfModule>
+
+# Кэширование статических файлов
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Изображения
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # CSS и JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+    
+    # Шрифты
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    
+    # HTML
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# Сжатие GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Заголовки кэширования для статических файлов
+<IfModule mod_headers.c>
+    # Кэширование изображений
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # Кэширование CSS и JS
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=2592000, public"
+        Header append Vary Accept-Encoding
+    </FilesMatch>
+    
+    # Кэширование шрифтов
+    <FilesMatch "\.(woff|woff2|ttf|eot)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # Без кэширования для PHP файлов
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Безопасность
+<IfModule mod_headers.c>
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# Запрет доступа к служебным файлам
+<FilesMatch "^(\.htaccess|\.git|config\.php|cache)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Запрет листинга директорий
+Options -Indexes
+

@@ -1,0 +1,21 @@
+# Кэш
+cache/
+*.cache
+
+# Конфигурация (если содержит секретные данные)
+# config.php
+
+# Временные файлы
+*.log
+*.tmp
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+

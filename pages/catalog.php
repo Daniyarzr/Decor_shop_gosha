@@ -1,6 +1,12 @@
 <?php
 session_start();
 require_once '../config.php';
+require_once '../includes/cache.php';
+
+// Версия для кэш-бастинга CSS/JS
+if (!defined('ASSETS_VERSION')) {
+    define('ASSETS_VERSION', '1.0.0');
+}
 
 // Получаем фильтры из GET-параметров
 $selected_categories = [];
@@ -46,16 +52,21 @@ if (isset($_GET['has_discount']) && ($_GET['has_discount'] === '1' || $_GET['has
     $has_discount = true;
 }
 
-// Получаем все активные акции для фильтра
+// Получаем все активные акции для фильтра (кэш 15 минут)
 $current_date = date('Y-m-d');
-$promotions_stmt = $pdo->prepare("
-    SELECT id, title, discount_value, discount_type 
-    FROM promotions 
-    WHERE is_active = 1 AND end_date >= ?
-    ORDER BY discount_value DESC
-");
-$promotions_stmt->execute([$current_date]);
-$all_promotions = $promotions_stmt->fetchAll();
+$cache_key_promotions = 'catalog_promotions_' . $current_date;
+$all_promotions = Cache::get($cache_key_promotions);
+if ($all_promotions === null) {
+    $promotions_stmt = $pdo->prepare("
+        SELECT id, title, discount_value, discount_type 
+        FROM promotions 
+        WHERE is_active = 1 AND end_date >= ?
+        ORDER BY discount_value DESC
+    ");
+    $promotions_stmt->execute([$current_date]);
+    $all_promotions = $promotions_stmt->fetchAll();
+    Cache::set($cache_key_promotions, $all_promotions, 900); // 15 минут
+}
 
 // Получаем ID товаров по акциям для фильтрации
 $product_ids_by_promotion = [];
@@ -232,9 +243,14 @@ foreach ($products as &$product) {
 }
 unset($product);
 
-// Получим уникальные категории
-$categories_stmt = $pdo->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != '' ORDER BY category");
-$all_categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
+// Получим уникальные категории (кэш 1 час)
+$cache_key_categories = 'catalog_categories';
+$all_categories = Cache::get($cache_key_categories);
+if ($all_categories === null) {
+    $categories_stmt = $pdo->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != '' ORDER BY category");
+    $all_categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
+    Cache::set($cache_key_categories, $all_categories, 3600); // 1 час
+}
 ?>
 
 <!DOCTYPE html>
@@ -243,8 +259,8 @@ $all_categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог товаров — Декор для дома</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/catalog.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
+    <link rel="stylesheet" href="../assets/css/catalog.css?v=<?php echo ASSETS_VERSION; ?>">
     <style>
         /* Стили для уведомления */
         @keyframes slideIn {

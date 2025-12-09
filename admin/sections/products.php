@@ -17,6 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_id'])) {
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$delete_id]);
         $message = "Товар успешно удален";
+        // Очищаем кэш категорий
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('catalog_categories');
     } catch (PDOException $e) {
         $error = "Ошибка при удалении: " . $e->getMessage();
     }
@@ -46,12 +49,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
         $stmt = $pdo->prepare("UPDATE products SET name = ?, price = ?, image = ?, category = ? WHERE id = ?");
         $stmt->execute([$name, $price, $image, $category, $id]);
         $message = "Товар успешно обновлен";
+        // Очищаем кэш категорий
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('catalog_categories');
     } else {
         // Добавление
         $stmt = $pdo->prepare("INSERT INTO products (name, price, image, category) VALUES (?, ?, ?, ?)");
         $stmt->execute([$name, $price, $image, $category]);
         $id = $pdo->lastInsertId();
         $message = "Товар успешно добавлен";
+        // Очищаем кэш категорий
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('catalog_categories');
     }
 }
 

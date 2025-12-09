@@ -12,46 +12,60 @@ if (!isset($pdo)) {
 
     
  
-// Подключаем конфигурацию
+// Подключаем конфигурацию и кэш
 require_once 'config.php';
+require_once 'includes/cache.php';
 
-// Получаем все активные слайды из БД
-try {
-    $stmt = $pdo->query("SELECT * FROM promo_sliders WHERE is_active = 1 ORDER BY sort_order ASC");
-    $slides = $stmt->fetchAll();
-} catch (PDOException $e) {
-    // Если ошибка - используем пустой массив
-    $slides = [];
-    error_log("Ошибка при загрузке слайдов: " . $e->getMessage());
+// Версия для кэш-бастинга CSS/JS
+define('ASSETS_VERSION', '1.0.0');
+
+// Получаем все активные слайды из БД (кэш 30 минут)
+$cache_key_slides = 'home_slides';
+$slides = Cache::get($cache_key_slides);
+if ($slides === null) {
+    try {
+        $stmt = $pdo->query("SELECT * FROM promo_sliders WHERE is_active = 1 ORDER BY sort_order ASC");
+        $slides = $stmt->fetchAll();
+        Cache::set($cache_key_slides, $slides, 1800); // 30 минут
+    } catch (PDOException $e) {
+        $slides = [];
+        error_log("Ошибка при загрузке слайдов: " . $e->getMessage());
+    }
 }
 
-
-
-// Получаем одобренные отзывы (до 6 штук)
-try {
-    $reviews = $pdo->query("SELECT name, text, rating, created_at FROM reviews WHERE status = 'approved' ORDER BY created_at DESC LIMIT 6")->fetchAll();
-} catch (PDOException $e) {
-    $reviews = [];
+// Получаем одобренные отзывы (до 6 штук) - кэш 1 час
+$cache_key_reviews = 'home_reviews';
+$reviews = Cache::get($cache_key_reviews);
+if ($reviews === null) {
+    try {
+        $reviews = $pdo->query("SELECT name, text, rating, created_at FROM reviews WHERE status = 'approved' ORDER BY created_at DESC LIMIT 6")->fetchAll();
+        Cache::set($cache_key_reviews, $reviews, 3600); // 1 час
+    } catch (PDOException $e) {
+        $reviews = [];
+    }
 }
 
-// Активные акции для блока «Специальные предложения» (до 4)
-$home_promotions = [];
-$current_date = date('Y-m-d');
-
-try {
-    $stmt = $pdo->prepare("
-        SELECT * 
-        FROM promotions 
-        WHERE is_active = 1 
-          AND start_date <= ? 
-          AND end_date >= ?
-        ORDER BY start_date DESC 
-        LIMIT 4
-    ");
-    $stmt->execute([$current_date, $current_date]);
-    $home_promotions = $stmt->fetchAll();
-} catch (PDOException $e) {
-    $home_promotions = [];
+// Активные акции для блока «Специальные предложения» (до 4) - кэш 15 минут
+$cache_key_promotions = 'home_promotions_' . date('Y-m-d-H');
+$home_promotions = Cache::get($cache_key_promotions);
+if ($home_promotions === null) {
+    $current_date = date('Y-m-d');
+    try {
+        $stmt = $pdo->prepare("
+            SELECT * 
+            FROM promotions 
+            WHERE is_active = 1 
+              AND start_date <= ? 
+              AND end_date >= ?
+            ORDER BY start_date DESC 
+            LIMIT 4
+        ");
+        $stmt->execute([$current_date, $current_date]);
+        $home_promotions = $stmt->fetchAll();
+        Cache::set($cache_key_promotions, $home_promotions, 900); // 15 минут
+    } catch (PDOException $e) {
+        $home_promotions = [];
+    }
 }
 
 ?>
@@ -63,7 +77,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Декор для дома — стиль и уют</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
 </head>
 <body>
 
@@ -389,8 +403,8 @@ try {
     <!-- Footer -->
     <?php include 'pages/footer.php'; ?>
 
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/index-slider.js"></script>
+    <script src="assets/js/main.js?v=<?php echo ASSETS_VERSION; ?>"></script>
+    <script src="assets/js/index-slider.js?v=<?php echo ASSETS_VERSION; ?>"></script>
 
 </body>
 <script>

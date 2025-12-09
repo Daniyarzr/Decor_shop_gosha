@@ -312,6 +312,9 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                 <a href="?section=sliders" class="nav-btn <?php echo $section == 'sliders' ? 'active' : ''; ?>">
                     <i class="fas fa-images"></i> Слайдеры
                 </a>
+                <a href="?section=cache_clear" class="nav-btn <?php echo $section == 'cache_clear' ? 'active' : ''; ?>">
+                    <i class="fas fa-database"></i> Кэш
+                </a>
                 <?php endif; ?>
             </nav>
         </header>
@@ -337,6 +340,9 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                     break;
                 case 'sliders':
                     if ($is_admin) include 'sections/sliders.php';
+                    break;
+                case 'cache_clear':
+                    if ($is_admin) include 'sections/cache_clear.php';
                     break;
                 case 'reviews':
                     include 'sections/reviews.php';

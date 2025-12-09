@@ -11,9 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_id'], $_POST['
     $allowed = ['pending','approved','rejected'];
     if (in_array($status, $allowed, true)) {
         try {
-            $stmt = $pdo->prepare("UPDATE reviews SET status = ? WHERE id = ?");
-            $stmt->execute([$status, $review_id]);
-            $message = "Статус обновлен";
+        $stmt = $pdo->prepare("UPDATE reviews SET status = ? WHERE id = ?");
+        $stmt->execute([$status, $review_id]);
+        $message = "Статус обновлен";
+        // Очищаем кэш отзывов
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('home_reviews');
         } catch (PDOException $e) {
             $error = "Ошибка обновления: " . $e->getMessage();
         }
@@ -37,6 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_review'])) {
         $stmt = $pdo->prepare("UPDATE reviews SET name=?, email=?, text=?, rating=?, status=? WHERE id=?");
         $stmt->execute([$name, $email, $text, $rating, $status, $review_id]);
         $message = "Отзыв обновлен";
+        // Очищаем кэш отзывов
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('home_reviews');
         $current_action = 'list';
     } catch (PDOException $e) {
         $error = "Ошибка сохранения: " . $e->getMessage();

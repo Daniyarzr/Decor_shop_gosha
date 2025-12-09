@@ -25,6 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
         $stmt = $pdo->prepare("DELETE FROM promotions WHERE id = ?");
         $stmt->execute([$delete_id]);
         $message = "Акция удалена";
+        // Очищаем кэш акций
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('home_promotions_' . date('Y-m-d-H'));
+        Cache::delete('catalog_promotions_' . date('Y-m-d'));
     } catch (PDOException $e) {
         $error = "Ошибка удаления: " . $e->getMessage();
     }
@@ -84,6 +88,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_promo'])) {
         }
         $message = $msg;
         $current_action = 'edit';
+        // Очищаем кэш акций
+        require_once __DIR__ . '/../../includes/cache.php';
+        Cache::delete('home_promotions_' . date('Y-m-d-H'));
+        Cache::delete('catalog_promotions_' . date('Y-m-d'));
     } catch (PDOException $e) {
         $error = "Ошибка сохранения: " . $e->getMessage();
     }
