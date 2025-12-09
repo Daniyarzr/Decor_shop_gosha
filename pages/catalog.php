@@ -3,22 +3,48 @@ session_start();
 require_once '../config.php';
 
 // Получаем фильтры из GET-параметров
-$selected_categories = $_GET['category'] ?? [];
-$selected_promotions = $_GET['promotion'] ?? [];
-$min_price = !empty($_GET['min_price']) ? (float)$_GET['min_price'] : null;
-$max_price = !empty($_GET['max_price']) ? (float)$_GET['max_price'] : null;
-$has_discount = isset($_GET['has_discount']) ? (bool)$_GET['has_discount'] : false;
+$selected_categories = [];
+$selected_promotions = [];
+$min_price = null;
+$max_price = null;
+$has_discount = false;
 
-// Приведём категории и акции к массивам
-if (!is_array($selected_categories)) {
-    $selected_categories = [$selected_categories];
+// Обработка категорий
+if (isset($_GET['category'])) {
+    if (is_array($_GET['category'])) {
+        $selected_categories = array_filter(array_map('trim', $_GET['category']));
+    } else {
+        $cat = trim($_GET['category']);
+        if (!empty($cat)) {
+            $selected_categories = [$cat];
+        }
+    }
 }
-$selected_categories = array_filter($selected_categories);
 
-if (!is_array($selected_promotions)) {
-    $selected_promotions = [$selected_promotions];
+// Обработка акций
+if (isset($_GET['promotion'])) {
+    if (is_array($_GET['promotion'])) {
+        $selected_promotions = array_filter(array_map('intval', $_GET['promotion']), function($v) { return $v > 0; });
+    } else {
+        $promo_id = (int)$_GET['promotion'];
+        if ($promo_id > 0) {
+            $selected_promotions = [$promo_id];
+        }
+    }
 }
-$selected_promotions = array_filter($selected_promotions);
+
+// Обработка цены
+if (!empty($_GET['min_price']) && is_numeric($_GET['min_price'])) {
+    $min_price = (float)$_GET['min_price'];
+}
+if (!empty($_GET['max_price']) && is_numeric($_GET['max_price'])) {
+    $max_price = (float)$_GET['max_price'];
+}
+
+// Обработка флага "только со скидкой"
+if (isset($_GET['has_discount']) && ($_GET['has_discount'] === '1' || $_GET['has_discount'] === 'on')) {
+    $has_discount = true;
+}
 
 // Получаем все активные акции для фильтра
 $current_date = date('Y-m-d');
@@ -70,18 +96,21 @@ if (!empty($selected_categories)) {
     $params = array_merge($params, $selected_categories);
 }
 
-// Фильтр по акциям (по ID товаров)
+// Фильтр по акциям и "только со скидкой" - объединяем через OR, если выбраны оба
+$promotion_product_ids = [];
 if (!empty($product_ids_by_promotion)) {
-    $placeholders = str_repeat('?,', count($product_ids_by_promotion) - 1) . '?';
-    $sql .= " AND p.id IN ($placeholders)";
-    $params = array_merge($params, $product_ids_by_promotion);
+    $promotion_product_ids = array_merge($promotion_product_ids, $product_ids_by_promotion);
 }
-
-// Фильтр "Только товары со скидкой"
 if ($has_discount && !empty($all_promotion_product_ids)) {
-    $placeholders = str_repeat('?,', count($all_promotion_product_ids) - 1) . '?';
+    $promotion_product_ids = array_merge($promotion_product_ids, $all_promotion_product_ids);
+}
+$promotion_product_ids = array_unique($promotion_product_ids);
+
+// Применяем фильтр по акциям
+if (!empty($promotion_product_ids)) {
+    $placeholders = str_repeat('?,', count($promotion_product_ids) - 1) . '?';
     $sql .= " AND p.id IN ($placeholders)";
-    $params = array_merge($params, $all_promotion_product_ids);
+    $params = array_merge($params, $promotion_product_ids);
 }
 
 // Фильтр по цене
@@ -819,12 +848,45 @@ $all_categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
             });
             
             // Добавляем возможность выбора "Только товары со скидкой" по клику на текст
-            document.querySelector('.filter-has-discount label').addEventListener('click', function(e) {
-                if (e.target.tagName !== 'INPUT') {
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    checkbox.checked = !checkbox.checked;
-                }
-            });
+            const hasDiscountLabel = document.querySelector('.filter-has-discount label');
+            if (hasDiscountLabel) {
+                hasDiscountLabel.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+            }
+            
+            // Автоматическая отправка формы при изменении фильтров (кроме полей цены)
+            const filterForm = document.getElementById('filter-form');
+            if (filterForm) {
+                // Обработчики для чекбоксов
+                filterForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        // Не отправляем сразу, даем пользователю возможность выбрать несколько
+                        // Отправка будет по кнопке "Применить"
+                    });
+                });
+                
+                // Обработчики для полей категорий
+                filterForm.querySelectorAll('input[name="category[]"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        // Можно добавить автоотправку или оставить ручную через кнопку
+                    });
+                });
+                
+                // Автоотправка при изменении цены (с небольшой задержкой)
+                let priceTimeout;
+                filterForm.querySelectorAll('input[name="min_price"], input[name="max_price"]').forEach(input => {
+                    input.addEventListener('input', function() {
+                        clearTimeout(priceTimeout);
+                        priceTimeout = setTimeout(() => {
+                            // Можно добавить автоотправку или оставить ручную
+                        }, 1000);
+                    });
+                });
+            }
         });
     </script>
 

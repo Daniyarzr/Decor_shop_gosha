@@ -27,6 +27,33 @@ try {
 
 
 
+// Получаем одобренные отзывы (до 6 штук)
+try {
+    $reviews = $pdo->query("SELECT name, text, rating, created_at FROM reviews WHERE status = 'approved' ORDER BY created_at DESC LIMIT 6")->fetchAll();
+} catch (PDOException $e) {
+    $reviews = [];
+}
+
+// Активные акции для блока «Специальные предложения» (до 4)
+$home_promotions = [];
+$current_date = date('Y-m-d');
+
+try {
+    $stmt = $pdo->prepare("
+        SELECT * 
+        FROM promotions 
+        WHERE is_active = 1 
+          AND start_date <= ? 
+          AND end_date >= ?
+        ORDER BY start_date DESC 
+        LIMIT 4
+    ");
+    $stmt->execute([$current_date, $current_date]);
+    $home_promotions = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $home_promotions = [];
+}
+
 ?>
 
 
@@ -168,7 +195,7 @@ try {
                             ?>
                             <div class="product-card">
                                 <div class="product-image">
-                                    <img src="<?php echo $actual_image; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                    <img src="<?php echo $actual_image; ?>" alt="<?php echo htmlspecialchars($image_path); ?>">
                                 </div>
                                 <div class="product-info">
                                     <h3><?php echo htmlspecialchars($product['name']); ?></h3>
@@ -212,31 +239,89 @@ try {
     <section class="special-offers">
         <div class="container">
             <div class="section-header">
-                <h2>Специальные предложения</h2>
-                <p>Не упустите возможность приобрести качественные товары для дома со скидками до 35%. Акции обновляются каждую неделю!</p>
+                <h2>Популярные акции</h2>
+                <p>Актуальные скидки и спецпредложения, которые мы рекомендуем сейчас.</p>
             </div>
+
             <div class="offers-grid">
-                <div class="offer-box">
-                    <span class="offer-tag">Хит продаж</span>
-                    <h3>35% Скидка на светильники</h3>
-                    <p>Освещайте свой дом с умом! Выбирайте стильные и энергоэффективные модели.</p>
-                </div>
-                <div class="offer-box">
-                    <span class="offer-tag">Новинка</span>
-                    <h3>10% Новогодний декор</h3>
-                    <p>Уютные пледы, подушки и постельное белье — создайте атмосферу комфорта.</p>
-                </div>
-                <div class="offer-box">
-                    <span class="offer-tag">Лучшая цена</span>
-                    <h3>5% Декоративные вазы</h3>
-                    <p>Добавьте изюминку интерьеру! Разнообразие форм, цветов и материалов.</p>
-                </div>
-                <div class="offer-box">
-                    <span class="offer-tag">Тренд</span>
-                    <h3>25% Картины и постеры</h3>
-                    <p>Превратите стены в галерею! Современный дизайн и классика на любой вкус.</p>
-                </div>
+                <?php if (empty($home_promotions)): ?>
+                    <div class="offer-box" style="grid-column: span 2;">
+                        <span class="offer-tag">Скоро</span>
+                        <h3>Здесь появятся горячие акции</h3>
+                        <p>Мы уже готовим новые предложения. Загляните чуть позже или посмотрите все акции.</p>
+                        <a class="offer-link" href="pages/promotions.php">Перейти к акциям</a>
+                    </div>
+                <?php else: ?>
+                    <?php 
+                    // Фолбэки для картинок акций (разные, чтобы не повторялись)
+                    $promo_fallbacks = [
+                        'assets/img/promotions/newyear_sale.jpg',
+                        'assets/img/slide1.jpg',
+                        'assets/img/slide2.jpg',
+                        'assets/img/slide3.jpg'
+                    ];
+                    ?>
+                    <?php foreach ($home_promotions as $promo_index => $promo): ?>
+                        <?php
+                            $discount_text = '';
+                            if ($promo['discount_type'] === 'percentage' && $promo['discount_value'] !== null) {
+                                $discount_text = '-' . (float)$promo['discount_value'] . '%';
+                            } elseif ($promo['discount_type'] === 'fixed' && $promo['discount_value'] !== null) {
+                                $discount_text = '-' . number_format((float)$promo['discount_value'], 0, '', ' ') . ' ₽';
+                            } else {
+                                $discount_text = 'Спецпредложение';
+                            }
+                            // Определяем путь к картинке акции
+                            $image_src = '';
+                            $promo_image = trim($promo['image'] ?? '');
+                            $baseDir = __DIR__ . '/';
+                            
+                            // Если у акции есть своя картинка
+                            if (!empty($promo_image)) {
+                                $promo_image = ltrim($promo_image, '/');
+                                $check_paths = [
+                                    // если в таблице лежит относительный путь
+                                    $promo_image,
+                                    'assets/img/promotions/' . $promo_image,
+                                    'assets/img/' . $promo_image,
+                                ];
+                                foreach ($check_paths as $check_path) {
+                                    $full_path = $baseDir . ltrim($check_path, '/');
+                                    if (file_exists($full_path)) {
+                                        $image_src = $check_path;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Если не нашли — используем разные фолбэки по индексу
+                            if (empty($image_src)) {
+                                $fallback = $promo_fallbacks[$promo_index % count($promo_fallbacks)];
+                                if (file_exists($baseDir . ltrim($fallback, '/'))) {
+                                    $image_src = $fallback;
+                                } else {
+                                    $image_src = '';
+                                }
+                            }
+                        ?>
+                        <div class="offer-box">
+                            <div class="offer-image">
+                                <img src="<?php echo htmlspecialchars($image_src ?: 'assets/img/slide1.jpg'); ?>" alt="<?php echo htmlspecialchars($promo['title']); ?>">
+                                <span class="offer-tag"><?php echo htmlspecialchars($discount_text); ?></span>
+                            </div>
+                            <h3><?php echo htmlspecialchars($promo['title']); ?></h3>
+                            <p><?php echo htmlspecialchars($promo['description']); ?></p>
+                            <div class="offer-meta">
+                                <span class="offer-dates">
+                                    до <?php echo date('d.m.Y', strtotime($promo['end_date'])); ?>
+                                </span>
+                                <a class="offer-link" href="pages/promotions.php#promo-<?php echo (int)$promo['id']; ?>">Подробнее</a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
+
             <a href="pages/promotions.php" class="btn-secondary">Смотреть все акции</a>
         </div>
     </section>
@@ -248,33 +333,30 @@ try {
                 <p>Более 10 000 довольных покупателей по всей стране — и их число растёт каждый день!</p>
             </div>
             <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>«Очень понравилось качество постельного белья — мягкое, приятное к телу, цвет не выцветает даже после множества стирок. Доставка быстрая, упаковка аккуратная. Обязательно закажу ещё!»</p>
+                <?php if (empty($reviews)): ?>
+                    <div class="testimonial-card" style="grid-column: span 3; text-align:center;">
+                        <div class="testimonial-content">
+                            <p>Пока нет опубликованных отзывов. Будьте первым!</p>
+                        </div>
                     </div>
-                    <div class="testimonial-author">
-                        <strong>Анна К.</strong>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>«Заказывала декоративные подушки и вазу — всё пришло в идеальном состоянии. Дизайн именно такой, как на фото. Интерьер сразу стал уютнее! Спасибо за отличный сервис.»</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <strong>Михаил С.</strong>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>«Покупал светильник в спальню — стильный, современный, свет мягкий и не режет глаза. Ценник приятно удивил. Рекомендую этот магазин всем друзьям!»</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <strong>Елена В.</strong>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                </div>
+                <?php else: ?>
+                    <?php foreach ($reviews as $rev): ?>
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>«<?= htmlspecialchars($rev['text']); ?>»</p>
+                            </div>
+                            <div class="testimonial-author">
+                                <strong><?= htmlspecialchars($rev['name']); ?></strong>
+                                <div class="rating">
+                                    <?php for ($i=1; $i<=5; $i++): ?>
+                                        <?= $i <= (int)$rev['rating'] ? '★' : '☆'; ?>
+                                    <?php endfor; ?>
+                                </div>
+                                <div style="font-size:12px; color:#777;"><?= date('d.m.Y', strtotime($rev['created_at'])); ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
             <a href="pages/reviews.php" class="btn-secondary">Смотреть все отзывы</a>
         </div>

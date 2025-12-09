@@ -4,6 +4,12 @@
 $current_action = $action ?: 'list';
 $uploadDir = realpath(__DIR__ . '/../../assets/img');
 
+// Только администратор может работать с товарами
+if (!$is_admin) {
+    echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
+    return;
+}
+
 // Удаление товара
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
@@ -20,14 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
     $name = trim($_POST['name']);
     $price = (float)$_POST['price'];
     $image = trim($_POST['image']);
-    $category = trim($_POST['category']);
+    $image = $image ? basename($image) : '';
+    // Используем новую категорию, если она указана, иначе используем выбранную
+    $category = !empty(trim($_POST['category_new'] ?? '')) 
+        ? trim($_POST['category_new']) 
+        : trim($_POST['category'] ?? '');
 
     // Если загружают файл — сохраняем его и подменяем путь
     if (!empty($_FILES['image_file']['name']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK && $uploadDir) {
         $safeName = basename($_FILES['image_file']['name']);
         $target = $uploadDir . DIRECTORY_SEPARATOR . $safeName;
         if (move_uploaded_file($_FILES['image_file']['tmp_name'], $target)) {
-            $image = 'assets/img/' . $safeName;
+            $image = $safeName;
         }
     }
     
@@ -65,7 +75,7 @@ if ($current_action == 'add' || $current_action == 'edit') {
             <div class="alert alert-danger"><?php echo $error; ?></div>
         <?php endif; ?>
         
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" onsubmit="return validateCategory()">
             <div class="form-group">
                 <label>Название товара</label>
                 <input type="text" name="name" class="form-control" 
@@ -91,8 +101,73 @@ if ($current_action == 'add' || $current_action == 'edit') {
             
             <div class="form-group">
                 <label>Категория</label>
-                <input type="text" name="category" class="form-control" 
-                       value="<?php echo htmlspecialchars($product['category'] ?? ''); ?>">
+                <?php
+                // Получаем все уникальные категории из БД
+                try {
+                    $categories_stmt = $pdo->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != '' ORDER BY category");
+                    $existing_categories = $categories_stmt->fetchAll(PDO::FETCH_COLUMN);
+                } catch (PDOException $e) {
+                    $existing_categories = [];
+                }
+                ?>
+                <select name="category" class="form-control" id="category-select">
+                    <option value="">-- Выберите категорию --</option>
+                    <?php foreach ($existing_categories as $cat): ?>
+                        <option value="<?php echo htmlspecialchars($cat); ?>" 
+                                <?php echo (isset($product['category']) && $product['category'] === $cat) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($cat); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Или введите новую категорию ниже</small>
+                <input type="text" name="category_new" class="form-control" style="margin-top: 5px;" 
+                       placeholder="Новая категория (если нет в списке)">
+                <script>
+                    // Если выбрана новая категория, используем её
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const categorySelect = document.querySelector('select[name="category"]');
+                        const categoryNewInput = document.querySelector('input[name="category_new"]');
+                        
+                        if (categorySelect && categoryNewInput) {
+                            // Показываем поле новой категории только если ничего не выбрано
+                            if (categorySelect.value === '') {
+                                categoryNewInput.style.display = 'block';
+                            } else {
+                                categoryNewInput.style.display = 'none';
+                            }
+                            
+                            categorySelect.addEventListener('change', function() {
+                                if (this.value === '') {
+                                    categoryNewInput.style.display = 'block';
+                                    categoryNewInput.required = true;
+                                } else {
+                                    categoryNewInput.style.display = 'none';
+                                    categoryNewInput.required = false;
+                                    categoryNewInput.value = '';
+                                }
+                            });
+                            
+                            categoryNewInput.addEventListener('input', function() {
+                                if (this.value.trim() !== '') {
+                                    categorySelect.value = '';
+                                    categorySelect.required = false;
+                                }
+                            });
+                        }
+                        
+                        // Валидация формы
+                        window.validateCategory = function() {
+                            const select = document.getElementById('category-select');
+                            const newInput = document.querySelector('input[name="category_new"]');
+                            
+                            if ((!select || select.value === '') && (!newInput || newInput.value.trim() === '')) {
+                                alert('Пожалуйста, выберите категорию из списка или введите новую');
+                                return false;
+                            }
+                            return true;
+                        };
+                    });
+                </script>
             </div>
             
             <button type="submit" name="save_product" class="btn-submit">

@@ -3,6 +3,12 @@
 
 $current_action = $action ?: 'list';
 
+// Только администратор может управлять слайдерами
+if (!$is_admin) {
+    echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
+    return;
+}
+
 // Удаление
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];

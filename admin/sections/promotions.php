@@ -4,6 +4,20 @@
 $current_action = $action ?: 'list';
 $uploadDir = realpath(__DIR__ . '/../../assets/img');
 
+// Подтянуть товары для привязки к акции
+$allProducts = [];
+try {
+    $allProducts = $pdo->query("SELECT id, name, price FROM products ORDER BY name ASC")->fetchAll();
+} catch (PDOException $e) {
+    $allProducts = [];
+}
+
+// Только администратор может управлять акциями
+if (!$is_admin) {
+    echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
+    return;
+}
+
 // Удаление
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
@@ -25,15 +39,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_promo'])) {
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $category_filter = trim($_POST['category_filter']);
-    $product_ids = trim($_POST['product_ids']);
+    if (isset($_POST['product_ids']) && is_array($_POST['product_ids'])) {
+        $ids = array_filter(
+            array_map('intval', $_POST['product_ids']),
+            function ($v) { return $v > 0; }
+        );
+        $product_ids = implode(',', $ids);
+    } else {
+        $product_ids = trim($_POST['product_ids']);
+    }
     $image = trim($_POST['image']);
+    $image = $image ? basename($image) : '';
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
     if (!empty($_FILES['image_file']['name']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK && $uploadDir) {
         $safeName = basename($_FILES['image_file']['name']);
         $target = $uploadDir . DIRECTORY_SEPARATOR . $safeName;
         if (move_uploaded_file($_FILES['image_file']['tmp_name'], $target)) {
-            $image = 'assets/img/' . $safeName;
+            $image = $safeName;
         }
     }
 
@@ -124,8 +147,19 @@ if ($current_action === 'add' || $current_action === 'edit') {
                 <input type="text" name="category_filter" class="form-control" value="<?php echo htmlspecialchars($promo['category_filter']); ?>">
             </div>
             <div class="form-group">
-                <label>ID товаров (через запятую)</label>
-                <input type="text" name="product_ids" class="form-control" value="<?php echo htmlspecialchars($promo['product_ids']); ?>">
+                <label>Товары в акции</label>
+                <select name="product_ids[]" class="form-control" multiple size="6" style="height:auto;">
+                    <?php
+                    $selectedIds = array_filter(array_map('intval', explode(',', $promo['product_ids'] ?? '')));
+                    foreach ($allProducts as $p):
+                        $sel = in_array((int)$p['id'], $selectedIds) ? 'selected' : '';
+                    ?>
+                        <option value="<?php echo $p['id']; ?>" <?php echo $sel; ?>>
+                            #<?php echo $p['id']; ?> — <?php echo htmlspecialchars($p['name']); ?> (<?php echo number_format($p['price'], 0, '', ' '); ?> ₽)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Удерживайте Ctrl/⌘ для выбора нескольких. Можно не выбирать — акция будет без привязанных товаров.</small>
             </div>
             <div class="form-group">
                 <label>Изображение (имя файла в assets/img)</label>

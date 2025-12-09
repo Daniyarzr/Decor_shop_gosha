@@ -429,6 +429,46 @@ $user_role = $_SESSION['role'] ?? $_SESSION['user_role'] ?? 'user';
         .no-orders p {
             margin-bottom: 20px;
         }
+        .btn-minimal {
+    display: inline-block;
+    padding: 10px 24px;
+    background: transparent;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+    box-shadow: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Варианты размеров */
+.btn-minimal-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+.btn-minimal-lg {
+    padding: 12px 28px;
+    font-size: 15px;
+}
+
+/* Состояния */
+.btn-minimal:hover {
+    border-color: #bbb;
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #222;
+    transform: translateY(-1px);
+}
     </style>
 </head>
 <body>
@@ -458,17 +498,17 @@ $user_role = $_SESSION['role'] ?? $_SESSION['user_role'] ?? 'user';
             <aside class="profile-sidebar">
                 <ul class="profile-menu">
                     <li><a href="#profile" class="active">Мой профиль</a></li>
-                    <?php if ($user_role === 'admin' || $user_role === 'moderator'): ?>
-                        <li>
-                            <a href="/admin/index.php" class="btn-admin-link">
-                                <i class="fas fa-cog"></i> Перейти в админ-панель
-                            </a>
-                        </li>
-                    <?php endif; ?>
                     <li><a href="#orders">История заказов</a></li>
                     <li><a href="#reviews">Мои отзывы</a></li>
                     <li><a href="logout.php">Выход</a></li>
                 </ul>
+                <?php if ($user_role === 'admin' || $user_role === 'moderator'): ?>
+                       
+                            <a href="/admin/index.php" class="btn-minimal">
+                                <i class="fas fa-cog"></i> Перейти в админ-панель
+                            </a>
+                        
+                    <?php endif; ?>
             </aside>
             
             <!-- Основной контент -->

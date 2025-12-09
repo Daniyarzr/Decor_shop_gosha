@@ -1,8 +1,8 @@
 <?php
 // admin/sections/orders.php
 
-// Обновление статуса заказа
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['status'])) {
+// Обновление статуса заказа (только админ)
+if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['status'])) {
     $order_id = (int)$_POST['order_id'];
     $status = $_POST['status'];
     $allowed = ['pending','processing','completed','cancelled'];
@@ -66,24 +66,31 @@ try {
                     <td><?php echo htmlspecialchars($order['email']); ?></td>
                     <td><?php echo number_format($order['total_amount'], 2, '.', ' '); ?> ₽</td>
                     <td>
-                        <form method="POST" style="display:flex; gap:6px; align-items:center;">
-                            <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
-                            <select name="status" class="form-control" style="min-width:130px;">
-                                <?php 
-                                $statuses = [
-                                    'pending' => 'Ожидает',
-                                    'processing' => 'В обработке',
-                                    'completed' => 'Завершен',
-                                    'cancelled' => 'Отменен'
-                                ];
-                                foreach ($statuses as $key => $title): ?>
-                                    <option value="<?php echo $key; ?>" <?php echo $order['status']==$key?'selected':''; ?>>
-                                        <?php echo $title; ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="submit" class="btn-action btn-edit">OK</button>
-                        </form>
+                        <?php 
+                        $statuses = [
+                            'pending' => 'Ожидает',
+                            'processing' => 'В обработке',
+                            'completed' => 'Завершен',
+                            'cancelled' => 'Отменен'
+                        ];
+                        ?>
+                        <?php if ($is_admin): ?>
+                            <form method="POST" style="display:flex; gap:6px; align-items:center;">
+                                <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                <select name="status" class="form-control" style="min-width:130px;">
+                                    <?php foreach ($statuses as $key => $title): ?>
+                                        <option value="<?php echo $key; ?>" <?php echo $order['status']==$key?'selected':''; ?>>
+                                            <?php echo $title; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="btn-action btn-edit">OK</button>
+                            </form>
+                        <?php else: ?>
+                            <span class="status-badge status-<?php echo htmlspecialchars($order['status']); ?>">
+                                <?php echo $statuses[$order['status']] ?? $order['status']; ?>
+                            </span>
+                        <?php endif; ?>
                     </td>
                     <td><?php echo date('d.m.Y H:i', strtotime($order['created_at'])); ?></td>
                     <td>

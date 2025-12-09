@@ -624,7 +624,7 @@ foreach ($promotions as $promotion) {
                     }
                     ?>
                     
-                    <div class="promotion-card" id="promotion-<?= $promotion['id'] ?>">
+                    <div class="promotion-card" id="promo-<?= $promotion['id'] ?>">
                         <div class="promotion-header">
                             <span class="promotion-badge">Акция 
                                 <span class="promotion-status status-<?= $status ?>"><?= $status_text ?></span>

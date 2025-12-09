@@ -41,16 +41,18 @@ try {
     
     <h3>Быстрые действия</h3>
     <div class="admin-nav" style="background: transparent; padding: 0;">
-        <a href="?section=products&action=add" class="btn-add">
-            <i class="fas fa-plus"></i> Добавить товар
-        </a>
+        <?php if ($is_admin): ?>
+            <a href="?section=products&action=add" class="btn-add">
+                <i class="fas fa-plus"></i> Добавить товар
+            </a>
+        <?php endif; ?>
         <a href="?section=orders" class="btn-add" style="background: #3498db;">
             <i class="fas fa-shopping-cart"></i> Просмотреть заказы
         </a>
         <?php if ($is_admin): ?>
-        <a href="?section=users" class="btn-add" style="background: #f39c12;">
-            <i class="fas fa-users"></i> Управление пользователями
-        </a>
+            <a href="?section=users" class="btn-add" style="background: #f39c12;">
+                <i class="fas fa-users"></i> Управление пользователями
+            </a>
         <?php endif; ?>
     </div>
 </div>

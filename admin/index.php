@@ -8,7 +8,7 @@ $action = $_GET['action'] ?? '';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Доступные разделы для модератора
-$moderator_sections = ['dashboard', 'products', 'orders', 'promotions'];
+$moderator_sections = ['dashboard', 'orders', 'reviews'];
 if (!$is_admin && !in_array($section, $moderator_sections)) {
     $section = 'dashboard';
 }
@@ -29,7 +29,7 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
+            background: #f7f8fb;
         }
         
         .admin-container {
@@ -39,12 +39,12 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .admin-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, #f25081 0%, #ff8ab5 100%);
             color: white;
             padding: 20px 30px;
-            border-radius: 12px;
+            border-radius: 16px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 30px rgba(242, 80, 129, 0.25);
         }
         
         .admin-nav {
@@ -55,24 +55,28 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .nav-btn {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.14);
             color: white;
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
             transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
         }
         
         .nav-btn:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.25);
             transform: translateY(-2px);
         }
         
         .nav-btn.active {
-            background: #3498db;
+            background: white;
+            color: #f25081;
+            box-shadow: 0 8px 20px rgba(255,255,255,0.25);
         }
         
         .user-info {
@@ -83,20 +87,22 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .user-role {
-            background: <?php echo $is_admin ? '#e74c3c' : '#3498db'; ?>;
+            background: <?php echo $is_admin ? '#c03967' : '#3498db'; ?>;
             color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
+            padding: 4px 12px;
+            border-radius: 16px;
             font-size: 12px;
             font-weight: bold;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
         
         .content-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 18px rgba(242, 80, 129, 0.08);
             margin-bottom: 20px;
+            border: 1px solid #f7d9e5;
         }
         
         .stats-grid {
@@ -109,15 +115,15 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         .stat-card {
             background: white;
             padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            border-left: 5px solid #f25081;
+            box-shadow: 0 6px 16px rgba(242, 80, 129, 0.08);
         }
         
         .stat-card h3 {
             font-size: 28px;
             margin: 0;
-            color: #2c3e50;
+            color: #c03967;
         }
         
         .stat-card p {
@@ -137,11 +143,11 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .admin-table th {
-            background: #f8f9fa;
+            background: #ffe8f1;
             padding: 12px 15px;
             text-align: left;
             font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 2px solid #ffd1e3;
         }
         
         .admin-table td {
@@ -165,17 +171,17 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .btn-edit {
-            background: #3498db;
+            background: #f25081;
             color: white;
         }
         
         .btn-delete {
-            background: #e74c3c;
+            background: #c03967;
             color: white;
         }
         
         .btn-add {
-            background: #27ae60;
+            background: linear-gradient(135deg, #f25081, #ff8ab5);
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
@@ -205,7 +211,7 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .btn-submit {
-            background: #3498db;
+            background: linear-gradient(135deg, #f25081, #ff8ab5);
             color: white;
             padding: 12px 30px;
             border: none;
@@ -249,7 +255,7 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         }
         
         .tab-btn.active {
-            background: #3498db;
+            background: #f25081;
             color: white;
         }
         
@@ -283,25 +289,30 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                 <a href="?section=dashboard" class="nav-btn <?php echo $section == 'dashboard' ? 'active' : ''; ?>">
                     <i class="fas fa-tachometer-alt"></i> Панель
                 </a>
+                <?php if ($is_admin): ?>
                 <a href="?section=products" class="nav-btn <?php echo $section == 'products' ? 'active' : ''; ?>">
                     <i class="fas fa-box"></i> Товары
                 </a>
+                <?php endif; ?>
                 <a href="?section=orders" class="nav-btn <?php echo $section == 'orders' ? 'active' : ''; ?>">
                     <i class="fas fa-shopping-cart"></i> Заказы
                 </a>
                 <a href="?section=reviews" class="nav-btn <?php echo $section == 'reviews' ? 'active' : ''; ?>">
                     <i class="fas fa-comments"></i> Отзывы
                 </a>
-                <a href="?section=users" class="nav-btn <?php echo ($section == 'users' && $is_admin) ? 'active' : ''; ?>" 
-                   <?php echo !$is_admin ? 'style="display:none;"' : ''; ?>>
+                <?php if ($is_admin): ?>
+                <a href="?section=users" class="nav-btn <?php echo ($section == 'users' && $is_admin) ? 'active' : ''; ?>">
                     <i class="fas fa-users"></i> Пользователи
                 </a>
+                <?php endif; ?>
+                <?php if ($is_admin): ?>
                 <a href="?section=promotions" class="nav-btn <?php echo $section == 'promotions' ? 'active' : ''; ?>">
                     <i class="fas fa-percent"></i> Акции
                 </a>
                 <a href="?section=sliders" class="nav-btn <?php echo $section == 'sliders' ? 'active' : ''; ?>">
                     <i class="fas fa-images"></i> Слайдеры
                 </a>
+                <?php endif; ?>
             </nav>
         </header>
         
@@ -313,7 +324,7 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                     include 'sections/dashboard.php';
                     break;
                 case 'products':
-                    include 'sections/products.php';
+                    if ($is_admin) include 'sections/products.php';
                     break;
                 case 'orders':
                     include 'sections/orders.php';
@@ -322,10 +333,10 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                     if ($is_admin) include 'sections/users.php';
                     break;
                 case 'promotions':
-                    include 'sections/promotions.php';
+                    if ($is_admin) include 'sections/promotions.php';
                     break;
                 case 'sliders':
-                    include 'sections/sliders.php';
+                    if ($is_admin) include 'sections/sliders.php';
                     break;
                 case 'reviews':
                     include 'sections/reviews.php';
