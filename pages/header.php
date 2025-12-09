@@ -29,19 +29,21 @@ require_once __DIR__ . '/../config.php';
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-shrink: 0;
         }
         
         .logo-image {
-            height: 45px;
+            height: 50px;
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
         }
         
         .logo-text {
             font-size: 24px;
             font-weight: bold;
             color: #333;
+            white-space: nowrap;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
     </style>
@@ -51,10 +53,7 @@ require_once __DIR__ . '/../config.php';
     <header>
         <div class="container">
             <div class="logo-container">
-                <!-- Логотип слева -->
-                <img src="<?= BASE_URL_RELATIVE ?>assets/img/logo.jpg" alt="Логотип Декор для дома" class="logo-image" 
-                     onerror="this.src='<?= BASE_URL_RELATIVE ?>assets/img/logo-placeholder.png'; this.alt='Логотип не найден'">
-                <!-- Название сайта -->
+                <img src="<?= BASE_URL_RELATIVE ?>assets/img/logo-icon.svg" alt="Логотип" class="logo-image">
                 <div class="logo-text">Декор для дома</div>
             </div>
             <nav>

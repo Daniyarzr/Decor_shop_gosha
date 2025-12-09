@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f25081;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff8ab5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Иконка логотипа -->
+  <g transform="translate(0, 5)">
+    <rect width="50" height="50" rx="10" fill="url(#logoGrad)"/>
+    <path d="M15 15 L25 10 L35 15 L35 25 L25 30 L15 25 Z" fill="white" opacity="0.9"/>
+    <circle cx="25" cy="20" r="4" fill="url(#logoGrad)"/>
+    <path d="M17.5 35 L22.5 32.5 L25 37.5 L27.5 32.5 L32.5 35 L30 40 L20 40 Z" fill="white" opacity="0.8"/>
+  </g>
+  
+  <!-- Текст -->
+  <text x="65" y="38" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#333">
+    Декор для дома
+  </text>
+</svg>
+

@@ -53,18 +53,18 @@ header .container {
 }
 
 .logo-image {
-    height: 40px;
+    height: 50px;
     width: auto;
     object-fit: contain;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
 
 .logo-text {
     font-size: 24px;
     font-weight: bold;
     color: #333;
-    white-space: nowrap; /* Запрещаем перенос текста */
+    white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 nav {
