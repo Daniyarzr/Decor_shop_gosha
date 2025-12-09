@@ -16,6 +16,8 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель | Decor Shop</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="alternate icon" href="../favicon.ico">
     
     <style>
         * {
@@ -42,6 +44,20 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
             border-radius: 16px;
             margin-bottom: 20px;
             box-shadow: 0 12px 30px rgba(242, 80, 129, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .admin-nav {
@@ -80,7 +96,7 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-top: 10px;
+            flex-wrap: wrap;
         }
         
         .user-role {
@@ -150,6 +166,17 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
         .admin-table td {
             padding: 12px 15px;
             border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        
+        .admin-table td img {
+            max-width: 50px;
+            max-height: 50px;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            display: block;
         }
         
         .admin-table tr:hover {

@@ -254,6 +254,8 @@ if ($all_categories === null) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог товаров — Декор для дома</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="alternate icon" href="../favicon.ico">
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
     <link rel="stylesheet" href="../assets/css/catalog.css?v=<?php echo ASSETS_VERSION; ?>">
     <link rel="stylesheet" href="../assets/css/catalog-inline.css?v=<?php echo ASSETS_VERSION; ?>">

@@ -64,6 +64,8 @@ if ($home_promotions === null) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Декор для дома — стиль и уют</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.ico">
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
     <link rel="stylesheet" href="assets/css/pages.css?v=<?php echo ASSETS_VERSION; ?>">
 </head>

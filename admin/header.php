@@ -7,7 +7,8 @@ require_once 'auth_check.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель | Decor Shop</title>
-    
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="alternate icon" href="../favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -149,10 +150,13 @@ require_once 'auth_check.php';
         .role-user { background-color: #2ecc71; color: white; }
         
         .product-image-admin {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             border-radius: 5px;
+            display: block;
+            max-width: 50px;
+            max-height: 50px;
         }
     </style>
 </head>

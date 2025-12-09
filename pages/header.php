@@ -9,6 +9,8 @@ require_once __DIR__ . '/../config.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Декор для дома</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="alternate icon" href="../favicon.ico">
     <style>
         .cart-count {
             background: #f25081;
