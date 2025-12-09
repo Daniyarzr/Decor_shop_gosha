@@ -1,5 +1,4 @@
 <?php
-// admin/sections/cache_clear.php
 require_once __DIR__ . '/../../includes/cache.php';
 
 $message = '';
@@ -23,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clean_cache'])) {
     }
 }
 
-// Получаем статистику кэша
 $cacheDir = __DIR__ . '/../../cache/data/';
 $cacheFiles = [];
 $totalSize = 0;
@@ -64,14 +62,14 @@ if (file_exists($cacheDir)) {
     
     <div style="margin-bottom: 30px;">
         <h3>Действия</h3>
-        <form method="POST" style="display: inline-block; margin-right: 10px;">
+        <form method="POST" class="form-inline-block">
             <button type="submit" name="clear_cache" class="btn-submit" onclick="return confirm('Вы уверены, что хотите очистить весь кэш?');">
                 <i class="fas fa-trash"></i> Очистить весь кэш
             </button>
         </form>
         
-        <form method="POST" style="display: inline-block;">
-            <button type="submit" name="clean_cache" class="btn-submit" style="background: #f39c12;">
+        <form method="POST" class="form-inline-block">
+            <button type="submit" name="clean_cache" class="btn-submit btn-warning">
                 <i class="fas fa-broom"></i> Удалить устаревшие записи
             </button>
         </form>
@@ -98,9 +96,9 @@ if (file_exists($cacheDir)) {
                             <td><?php echo date('d.m.Y H:i:s', $file['expires']); ?></td>
                             <td>
                                 <?php if ($file['is_expired']): ?>
-                                    <span style="color: #e74c3c;">Устарел</span>
+                                    <span class="status-expired">Устарел</span>
                                 <?php else: ?>
-                                    <span style="color: #27ae60;">Активен</span>
+                                    <span class="status-active">Активен</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

@@ -1,23 +1,18 @@
 <?php
-// admin/sections/products.php
-
 $current_action = $action ?: 'list';
 $uploadDir = realpath(__DIR__ . '/../../assets/img');
 
-// Только администратор может работать с товарами
 if (!$is_admin) {
     echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
     return;
 }
 
-// Удаление товара
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     try {
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$delete_id]);
         $message = "Товар успешно удален";
-        // Очищаем кэш категорий
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('catalog_categories');
     } catch (PDOException $e) {
@@ -30,12 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
     $price = (float)$_POST['price'];
     $image = trim($_POST['image']);
     $image = $image ? basename($image) : '';
-    // Используем новую категорию, если она указана, иначе используем выбранную
     $category = !empty(trim($_POST['category_new'] ?? '')) 
         ? trim($_POST['category_new']) 
         : trim($_POST['category'] ?? '');
 
-    // Если загружают файл — сохраняем его и подменяем путь
     if (!empty($_FILES['image_file']['name']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK && $uploadDir) {
         $safeName = basename($_FILES['image_file']['name']);
         $target = $uploadDir . DIRECTORY_SEPARATOR . $safeName;
@@ -45,20 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
     }
     
     if ($id > 0) {
-        // Редактирование
         $stmt = $pdo->prepare("UPDATE products SET name = ?, price = ?, image = ?, category = ? WHERE id = ?");
         $stmt->execute([$name, $price, $image, $category, $id]);
         $message = "Товар успешно обновлен";
-        // Очищаем кэш категорий
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('catalog_categories');
     } else {
-        // Добавление
         $stmt = $pdo->prepare("INSERT INTO products (name, price, image, category) VALUES (?, ?, ?, ?)");
         $stmt->execute([$name, $price, $image, $category]);
         $id = $pdo->lastInsertId();
         $message = "Товар успешно добавлен";
-        // Очищаем кэш категорий
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('catalog_categories');
     }
@@ -129,16 +118,14 @@ if ($current_action == 'add' || $current_action == 'edit') {
                     <?php endforeach; ?>
                 </select>
                 <small class="text-muted">Или введите новую категорию ниже</small>
-                <input type="text" name="category_new" class="form-control" style="margin-top: 5px;" 
+                <input type="text" name="category_new" class="form-control category-new-input" 
                        placeholder="Новая категория (если нет в списке)">
                 <script>
-                    // Если выбрана новая категория, используем её
                     document.addEventListener('DOMContentLoaded', function() {
                         const categorySelect = document.querySelector('select[name="category"]');
                         const categoryNewInput = document.querySelector('input[name="category_new"]');
                         
                         if (categorySelect && categoryNewInput) {
-                            // Показываем поле новой категории только если ничего не выбрано
                             if (categorySelect.value === '') {
                                 categoryNewInput.style.display = 'block';
                             } else {
@@ -164,7 +151,6 @@ if ($current_action == 'add' || $current_action == 'edit') {
                             });
                         }
                         
-                        // Валидация формы
                         window.validateCategory = function() {
                             const select = document.getElementById('category-select');
                             const newInput = document.querySelector('input[name="category_new"]');
@@ -182,7 +168,7 @@ if ($current_action == 'add' || $current_action == 'edit') {
             <button type="submit" name="save_product" class="btn-submit">
                 <?php echo $id > 0 ? 'Сохранить изменения' : 'Добавить товар'; ?>
             </button>
-            <a href="?section=products" class="btn-action" style="background: #95a5a6;">Отмена</a>
+            <a href="?section=products" class="btn-action btn-cancel">Отмена</a>
         </form>
     </div>
     
@@ -236,7 +222,7 @@ if ($current_action == 'add' || $current_action == 'edit') {
                                         }
                                     ?>
                                     <img src="../<?php echo htmlspecialchars($img); ?>" 
-                                         alt="Изображение" style="width: 50px; height: 50px; object-fit: cover;">
+                                         alt="Изображение" class="product-image-admin">
                                 <?php endif; ?>
                             </td>
                             <td><?php echo htmlspecialchars($product['name']); ?></td>
@@ -245,7 +231,7 @@ if ($current_action == 'add' || $current_action == 'edit') {
                             <td>
                                 <a href="?section=products&action=edit&id=<?php echo $product['id']; ?>" 
                                    class="btn-action btn-edit">Изменить</a>
-                                <form method="POST" style="display:inline;" 
+                                <form method="POST" class="btn-action-inline" 
                                       onsubmit="return confirmDelete('Удалить товар &quot;<?php echo addslashes($product['name']); ?>&quot;?')">
                                     <input type="hidden" name="delete_id" value="<?php echo $product['id']; ?>">
                                     <button type="submit" class="btn-action btn-delete">Удалить</button>

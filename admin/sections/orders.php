@@ -1,7 +1,4 @@
 <?php
-// admin/sections/orders.php
-
-// Обновление статуса заказа (только админ)
 if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['status'])) {
     $order_id = (int)$_POST['order_id'];
     $status = $_POST['status'];
@@ -17,7 +14,6 @@ if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id
     }
 }
 
-// Получаем заказы + пользователя
 try {
     $orders = $pdo->query("
         SELECT o.*, u.username 
@@ -75,9 +71,9 @@ try {
                         ];
                         ?>
                         <?php if ($is_admin): ?>
-                            <form method="POST" style="display:flex; gap:6px; align-items:center;">
+                            <form method="POST" class="form-inline-flex">
                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
-                                <select name="status" class="form-control" style="min-width:130px;">
+                                <select name="status" class="form-control select-min-width-large">
                                     <?php foreach ($statuses as $key => $title): ?>
                                         <option value="<?php echo $key; ?>" <?php echo $order['status']==$key?'selected':''; ?>>
                                             <?php echo $title; ?>
@@ -97,7 +93,7 @@ try {
                         <button class="btn-action btn-edit" onclick="toggleDetails(<?php echo $order['id']; ?>)">Показать</button>
                     </td>
                 </tr>
-                <tr id="order-details-<?php echo $order['id']; ?>" style="display:none; background:#f8f9fa;">
+                <tr id="order-details-<?php echo $order['id']; ?>" class="order-details-row">
                     <td colspan="9">
                         <?php
                         try {
@@ -112,8 +108,8 @@ try {
                         }
                         ?>
                         <strong>Товары:</strong>
-                        <div class="table-container" style="margin-top:10px;">
-                            <table class="admin-table" style="margin:0;">
+                        <div class="table-container table-container-margin">
+                            <table class="admin-table table-margin-zero">
                                 <thead>
                                     <tr>
                                         <th>Название</th>
@@ -137,7 +133,7 @@ try {
                                 </tbody>
                             </table>
                         </div>
-                        <div style="margin-top:10px;">
+                        <div class="margin-top-small">
                             <div><strong>Адрес:</strong> <?php echo htmlspecialchars($order['shipping_address']); ?></div>
                             <div><strong>Город:</strong> <?php echo htmlspecialchars($order['city']); ?></div>
                             <div><strong>Оплата:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></div>

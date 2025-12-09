@@ -1,13 +1,10 @@
 <?php
-// admin/index.php
 require_once 'auth_check.php';
 
-// Определяем какой раздел показывать
 $section = $_GET['section'] ?? 'dashboard';
 $action = $_GET['action'] ?? '';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Доступные разделы для модератора
 $moderator_sections = ['dashboard', 'orders', 'reviews'];
 if (!$is_admin && !in_array($section, $moderator_sections)) {
     $section = 'dashboard';
@@ -277,10 +274,10 @@ if (!$is_admin && !in_array($section, $moderator_sections)) {
                 <span class="user-role">
                     <?php echo $is_admin ? 'Администратор' : 'Модератор'; ?>
                 </span>
-                <a href="../index.php" class="nav-btn" style="background: #27ae60;">
+                <a href="../index.php" class="nav-btn nav-btn-success">
                     <i class="fas fa-home"></i> На сайт
                 </a>
-                <a href="../logout.php" class="nav-btn" style="background: #e74c3c;">
+                <a href="../logout.php" class="nav-btn nav-btn-danger">
                     <i class="fas fa-sign-out-alt"></i> Выход
                 </a>
             </div>

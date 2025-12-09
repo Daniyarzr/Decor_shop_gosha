@@ -1,10 +1,7 @@
 <?php
-// admin/sections/promotions.php
-
 $current_action = $action ?: 'list';
 $uploadDir = realpath(__DIR__ . '/../../assets/img');
 
-// Подтянуть товары для привязки к акции
 $allProducts = [];
 try {
     $allProducts = $pdo->query("SELECT id, name, price FROM products ORDER BY name ASC")->fetchAll();
@@ -12,20 +9,17 @@ try {
     $allProducts = [];
 }
 
-// Только администратор может управлять акциями
 if (!$is_admin) {
     echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
     return;
 }
 
-// Удаление
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     try {
         $stmt = $pdo->prepare("DELETE FROM promotions WHERE id = ?");
         $stmt->execute([$delete_id]);
         $message = "Акция удалена";
-        // Очищаем кэш акций
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('home_promotions_' . date('Y-m-d-H'));
         Cache::delete('catalog_promotions_' . date('Y-m-d'));
@@ -34,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     }
 }
 
-// Сохранение
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_promo'])) {
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
@@ -156,7 +149,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
             </div>
             <div class="form-group">
                 <label>Товары в акции</label>
-                <select name="product_ids[]" class="form-control" multiple size="6" style="height:auto;">
+                <select name="product_ids[]" class="form-control select-multiple" multiple size="6">
                     <?php
                     $selectedIds = array_filter(array_map('intval', explode(',', $promo['product_ids'] ?? '')));
                     foreach ($allProducts as $p):
@@ -181,7 +174,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
                 <label><input type="checkbox" name="is_active" <?php echo $promo['is_active'] ? 'checked' : ''; ?>> Активна</label>
             </div>
             <button type="submit" name="save_promo" class="btn-submit"><?php echo $id ? 'Сохранить' : 'Создать'; ?></button>
-            <a href="?section=promotions" class="btn-action" style="background:#95a5a6;">Отмена</a>
+            <a href="?section=promotions" class="btn-action btn-cancel">Отмена</a>
         </form>
     </div>
     <?php
@@ -230,7 +223,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
                         <td><?php echo $p['is_active'] ? 'Да' : 'Нет'; ?></td>
                         <td>
                             <a class="btn-action btn-edit" href="?section=promotions&action=edit&id=<?php echo $p['id']; ?>">Изменить</a>
-                            <form method="POST" style="display:inline;" onsubmit="return confirm('Удалить акцию?');">
+                            <form method="POST" class="btn-action-inline" onsubmit="return confirm('Удалить акцию?');">
                                 <input type="hidden" name="delete_id" value="<?php echo $p['id']; ?>">
                                 <button type="submit" class="btn-action btn-delete">Удалить</button>
                             </form>

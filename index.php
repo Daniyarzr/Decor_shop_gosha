@@ -1,51 +1,38 @@
 <?php
 session_start();
-require 'config.php'; // Этот файл создает переменную $pdo
+require_once 'config.php';
+require_once 'includes/cache.php';
 
-// Проверяем подключение
 if (!isset($pdo)) {
     die("Ошибка: Нет подключения к базе данных");
 }
 
-
-// Если у вас уже есть подключение $conn
-
-    
- 
-// Подключаем конфигурацию и кэш
-require_once 'config.php';
-require_once 'includes/cache.php';
-
-// Версия для кэш-бастинга CSS/JS
 define('ASSETS_VERSION', '1.0.0');
 
-// Получаем все активные слайды из БД (кэш 30 минут)
 $cache_key_slides = 'home_slides';
 $slides = Cache::get($cache_key_slides);
 if ($slides === null) {
     try {
         $stmt = $pdo->query("SELECT * FROM promo_sliders WHERE is_active = 1 ORDER BY sort_order ASC");
         $slides = $stmt->fetchAll();
-        Cache::set($cache_key_slides, $slides, 1800); // 30 минут
+        Cache::set($cache_key_slides, $slides, 1800);
     } catch (PDOException $e) {
         $slides = [];
         error_log("Ошибка при загрузке слайдов: " . $e->getMessage());
     }
 }
 
-// Получаем одобренные отзывы (до 6 штук) - кэш 1 час
 $cache_key_reviews = 'home_reviews';
 $reviews = Cache::get($cache_key_reviews);
 if ($reviews === null) {
     try {
         $reviews = $pdo->query("SELECT name, text, rating, created_at FROM reviews WHERE status = 'approved' ORDER BY created_at DESC LIMIT 6")->fetchAll();
-        Cache::set($cache_key_reviews, $reviews, 3600); // 1 час
+        Cache::set($cache_key_reviews, $reviews, 3600);
     } catch (PDOException $e) {
         $reviews = [];
     }
 }
 
-// Активные акции для блока «Специальные предложения» (до 4) - кэш 15 минут
 $cache_key_promotions = 'home_promotions_' . date('Y-m-d-H');
 $home_promotions = Cache::get($cache_key_promotions);
 if ($home_promotions === null) {
@@ -62,7 +49,7 @@ if ($home_promotions === null) {
         ");
         $stmt->execute([$current_date, $current_date]);
         $home_promotions = $stmt->fetchAll();
-        Cache::set($cache_key_promotions, $home_promotions, 900); // 15 минут
+        Cache::set($cache_key_promotions, $home_promotions, 900);
     } catch (PDOException $e) {
         $home_promotions = [];
     }
@@ -78,14 +65,12 @@ if ($home_promotions === null) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Декор для дома — стиль и уют</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
+    <link rel="stylesheet" href="assets/css/pages.css?v=<?php echo ASSETS_VERSION; ?>">
 </head>
 <body>
 
 
     <?php include 'pages/header.php'; ?>
-
-        <!-- Promo Banner Slider — как на референсе -->
-
 
     <section class="promo-banner-slider">
         <?php if (!empty($slides)): ?>
@@ -109,7 +94,6 @@ if ($home_promotions === null) {
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <!-- Если нет слайдов в БД, показываем заглушку -->
             <div class="promo-slide active" data-index="0">
                 <div class="promo-overlay"></div>
                 <div class="promo-content">
@@ -124,11 +108,9 @@ if ($home_promotions === null) {
             </div>
         <?php endif; ?>
         
-        <!-- Навигационные кнопки -->
         <button class="slider-arrow left">‹</button>
         <button class="slider-arrow right">›</button>
         
-        <!-- Индикаторы -->
         <div class="promo-dots">
             <?php for ($i = 0; $i < count($slides); $i++): ?>
                 <span class="dot <?php echo $i === 0 ? 'active' : ''; ?>" data-slide="<?php echo $i; ?>"></span>
@@ -136,7 +118,6 @@ if ($home_promotions === null) {
         </div>
     </section>
 
-    <!-- О компании -->
     <section class="about-company">
         <div class="container">
             <h2>О компании</h2>
@@ -173,7 +154,6 @@ if ($home_promotions === null) {
                 </div>
     </section>
 
-    <!-- Популярные товары — статичная сетка 1x4 -->
     <section class="popular-products">
         <div class="products-wrapper">
             <div class="section-header">
@@ -186,19 +166,16 @@ if ($home_promotions === null) {
                 $products_by_id = [];
                 
                 try {
-                    // Получаем все товары одним запросом
                     $placeholders = str_repeat('?,', count($popular_ids) - 1) . '?';
                     $query = "SELECT * FROM products WHERE id IN ($placeholders)";
                     $stmt = $pdo->prepare($query);
                     $stmt->execute($popular_ids);
                     $all_products = $stmt->fetchAll();
                     
-                    // Создаем ассоциативный массив [id => product]
                     foreach ($all_products as $product) {
                         $products_by_id[$product['id']] = $product;
                     }
                     
-                    // Выводим в нужном порядке
                     foreach ($popular_ids as $id) {
                         if (isset($products_by_id[$id])) {
                             $product = $products_by_id[$id];
@@ -238,18 +215,7 @@ if ($home_promotions === null) {
             </div>
         </div>
     </section>
-        <!-- Навигация -->
-        <button class="slider-arrow left">‹</button>
-        <button class="slider-arrow right">›</button>
-        <div class="slider-dots">
-            <span class="dot active" data-slide="0"></span>
-            <span class="dot" data-slide="1"></span>
-            <span class="dot" data-slide="2"></span>
-            <span class="dot" data-slide="3"></span>
-        </div>
-    </section>
 
-    <!-- Специальные предложения -->
     <section class="special-offers">
         <div class="container">
             <div class="section-header">
@@ -259,7 +225,7 @@ if ($home_promotions === null) {
 
             <div class="offers-grid">
                 <?php if (empty($home_promotions)): ?>
-                    <div class="offer-box" style="grid-column: span 2;">
+                    <div class="offer-box offer-box-span-2">
                         <span class="offer-tag">Скоро</span>
                         <h3>Здесь появятся горячие акции</h3>
                         <p>Мы уже готовим новые предложения. Загляните чуть позже или посмотрите все акции.</p>
@@ -267,7 +233,6 @@ if ($home_promotions === null) {
                     </div>
                 <?php else: ?>
                     <?php 
-                    // Фолбэки для картинок акций (разные, чтобы не повторялись)
                     $promo_fallbacks = [
                         'assets/img/promotions/newyear_sale.jpg',
                         'assets/img/slide1.jpg',
@@ -285,16 +250,14 @@ if ($home_promotions === null) {
                             } else {
                                 $discount_text = 'Спецпредложение';
                             }
-                            // Определяем путь к картинке акции
+                            
                             $image_src = '';
                             $promo_image = trim($promo['image'] ?? '');
                             $baseDir = __DIR__ . '/';
                             
-                            // Если у акции есть своя картинка
                             if (!empty($promo_image)) {
                                 $promo_image = ltrim($promo_image, '/');
                                 $check_paths = [
-                                    // если в таблице лежит относительный путь
                                     $promo_image,
                                     'assets/img/promotions/' . $promo_image,
                                     'assets/img/' . $promo_image,
@@ -308,7 +271,6 @@ if ($home_promotions === null) {
                                 }
                             }
 
-                            // Если не нашли — используем разные фолбэки по индексу
                             if (empty($image_src)) {
                                 $fallback = $promo_fallbacks[$promo_index % count($promo_fallbacks)];
                                 if (file_exists($baseDir . ltrim($fallback, '/'))) {
@@ -348,7 +310,7 @@ if ($home_promotions === null) {
             </div>
             <div class="testimonials-grid">
                 <?php if (empty($reviews)): ?>
-                    <div class="testimonial-card" style="grid-column: span 3; text-align:center;">
+                    <div class="testimonial-card testimonial-card-span-3">
                         <div class="testimonial-content">
                             <p>Пока нет опубликованных отзывов. Будьте первым!</p>
                         </div>
@@ -366,7 +328,7 @@ if ($home_promotions === null) {
                                         <?= $i <= (int)$rev['rating'] ? '★' : '☆'; ?>
                                     <?php endfor; ?>
                                 </div>
-                                <div style="font-size:12px; color:#777;"><?= date('d.m.Y', strtotime($rev['created_at'])); ?></div>
+                                <div class="review-date"><?= date('d.m.Y', strtotime($rev['created_at'])); ?></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -376,7 +338,6 @@ if ($home_promotions === null) {
         </div>
     </section>
 
-    <!-- Контактная информация / Консультация -->
     <section class="consultation-cta">
         <div class="container">
             <div class="cta-content">
@@ -400,7 +361,6 @@ if ($home_promotions === null) {
         </div>
     </section>
 
-    <!-- Footer -->
     <?php include 'pages/footer.php'; ?>
 
     <script src="assets/js/main.js?v=<?php echo ASSETS_VERSION; ?>"></script>
@@ -408,20 +368,17 @@ if ($home_promotions === null) {
 
 </body>
 <script>
-// Функция для показа уведомления
 function showNotification(message, isError = false) {
-    // Удаляем старое уведомление, если есть
     const oldNotification = document.querySelector('.cart-notification');
     if (oldNotification) {
         oldNotification.remove();
     }
     
-    // Создаем новое уведомление
     const notification = document.createElement('div');
     notification.className = 'cart-notification';
     notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <svg style="width: 20px; height: 20px; fill: white;" viewBox="0 0 24 24">
+        <div class="notification-content">
+            <svg class="notification-icon" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
             <span>${message}</span>
@@ -432,7 +389,6 @@ function showNotification(message, isError = false) {
     }
     document.body.appendChild(notification);
     
-    // Удаляем уведомление через 3 секунды
     setTimeout(() => {
         notification.classList.add('hiding');
         setTimeout(() => {
@@ -441,7 +397,6 @@ function showNotification(message, isError = false) {
     }, 3000);
 }
 
-// Функция обновления счетчика корзины
 function updateCartCount(count) {
     const cartCounts = document.querySelectorAll('.cart-count');
     cartCounts.forEach(element => {
@@ -454,7 +409,6 @@ function updateCartCount(count) {
     });
 }
 
-// Обработчик кликов по кнопкам "В корзину" в популярных товарах
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function() {
@@ -467,17 +421,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Сохраняем оригинальный текст и состояние
             const originalText = this.textContent;
             const originalBackground = this.style.background;
             const originalColor = this.style.color;
             
-            // Показываем состояние загрузки
             this.textContent = 'Добавляем...';
             this.disabled = true;
             this.style.opacity = '0.7';
             
-            // Отправляем запрос на добавление в корзину
             fetch('pages/cart.php', {
                 method: 'POST',
                 headers: {
@@ -493,18 +444,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data.status === 'success') {
-                    // Показываем уведомление
                     showNotification(`${productName} добавлен в корзину!`);
-                    
-                    // Обновляем счетчик в корзине
                     updateCartCount(data.count);
-                    
-                    // Визуальная обратная связь на кнопке
                     this.textContent = '✓ В корзине';
                     this.style.background = '#4CAF50';
                     this.style.color = 'white';
                     
-                    // Возвращаем кнопку в исходное состояние через 2 секунды
                     setTimeout(() => {
                         this.textContent = originalText;
                         this.style.background = originalBackground;
@@ -519,8 +464,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error:', error);
                 showNotification('Ошибка при добавлении товара в корзину', true);
-                
-                // Возвращаем кнопку в исходное состояние
                 this.textContent = originalText;
                 this.disabled = false;
                 this.style.opacity = '1';
@@ -528,7 +471,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Загружаем начальное количество товаров в корзине
     fetch('pages/cart.php?get_count=true')
         .then(response => response.json())
         .then(data => {
@@ -540,7 +482,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading cart count:', error);
         });
 });
-document.head.appendChild(style);
 </script>
 </body>
 </html>

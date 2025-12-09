@@ -1,10 +1,5 @@
 <?php
-// admin/sections/reviews.php
-// Ожидаем таблицу `reviews` с полями: id, user_id (NULLable), name, email, text, rating, status (pending/approved/rejected), created_at
-
 $current_action = $action ?: 'list';
-
-// Обновление статуса быстрого действия
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_id'], $_POST['status']) && !isset($_POST['save_review'])) {
     $review_id = (int)$_POST['review_id'];
     $status = $_POST['status'];
@@ -14,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_id'], $_POST['
         $stmt = $pdo->prepare("UPDATE reviews SET status = ? WHERE id = ?");
         $stmt->execute([$status, $review_id]);
         $message = "Статус обновлен";
-        // Очищаем кэш отзывов
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('home_reviews');
         } catch (PDOException $e) {
@@ -23,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_id'], $_POST['
     }
 }
 
-// Сохранение/редактирование содержимого
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_review'])) {
     $review_id = (int)$_POST['review_id'];
     $name = trim($_POST['name']);
@@ -40,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_review'])) {
         $stmt = $pdo->prepare("UPDATE reviews SET name=?, email=?, text=?, rating=?, status=? WHERE id=?");
         $stmt->execute([$name, $email, $text, $rating, $status, $review_id]);
         $message = "Отзыв обновлен";
-        // Очищаем кэш отзывов
         require_once __DIR__ . '/../../includes/cache.php';
         Cache::delete('home_reviews');
         $current_action = 'list';
@@ -49,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_review'])) {
     }
 }
 
-// Удаление
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     try {
@@ -61,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     }
 }
 
-// Форма редактирования
 if ($current_action === 'edit' && $id > 0) {
     $stmt = $pdo->prepare("SELECT * FROM reviews WHERE id = ?");
     $stmt->execute([$id]);
@@ -114,9 +104,9 @@ try {
                 </select>
             </div>
             <button type="submit" name="save_review" class="btn-submit">Сохранить</button>
-            <a class="btn-action" style="background:#95a5a6;" href="?section=reviews">Отмена</a>
+            <a class="btn-action btn-cancel" href="?section=reviews">Отмена</a>
         </form>
-        <hr style="margin:20px 0;">
+        <hr class="hr-margin">
     <?php endif; ?>
 
     <div class="table-container mt-3">
@@ -142,9 +132,9 @@ try {
                     <td><?php echo (int)$r['rating']; ?></td>
                     <td><?php echo htmlspecialchars(mb_substr($r['text'], 0, 120)); ?></td>
                     <td>
-                        <form method="POST" style="display:flex; gap:6px; align-items:center;">
+                        <form method="POST" class="form-inline-flex">
                             <input type="hidden" name="review_id" value="<?php echo $r['id']; ?>">
-                            <select name="status" class="form-control" style="min-width:120px;">
+                            <select name="status" class="form-control select-min-width">
                                 <option value="pending" <?php echo $r['status']=='pending'?'selected':''; ?>>pending</option>
                                 <option value="approved" <?php echo $r['status']=='approved'?'selected':''; ?>>approved</option>
                                 <option value="rejected" <?php echo $r['status']=='rejected'?'selected':''; ?>>rejected</option>
@@ -155,7 +145,7 @@ try {
                     <td><?php echo date('d.m.Y H:i', strtotime($r['created_at'])); ?></td>
                     <td>
                         <a class="btn-action btn-edit" href="?section=reviews&action=edit&id=<?php echo $r['id']; ?>">Изменить</a>
-                        <form method="POST" style="display:inline;" onsubmit="return confirm('Удалить отзыв?');">
+                        <form method="POST" class="btn-action-inline" onsubmit="return confirm('Удалить отзыв?');">
                             <input type="hidden" name="delete_id" value="<?php echo $r['id']; ?>">
                             <button type="submit" class="btn-action btn-delete">Удалить</button>
                         </form>

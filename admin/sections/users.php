@@ -1,5 +1,4 @@
 <?php
-// admin/sections/users.php
 if (!$is_admin) {
     echo "<div class='content-card'><div class='alert alert-danger'>Доступ запрещен</div></div>";
     return;
@@ -7,7 +6,6 @@ if (!$is_admin) {
 
 $current_action = $action ?: 'list';
 
-// Удаление пользователя (кроме себя)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     if ($delete_id !== $user_id) {
@@ -23,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     }
 }
 
-// Сохранение/создание
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_user'])) {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -104,7 +101,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
                 <input type="password" name="password" class="form-control">
             </div>
             <button type="submit" name="save_user" class="btn-submit"><?php echo $id ? 'Сохранить' : 'Создать'; ?></button>
-            <a href="?section=users" class="btn-action" style="background:#95a5a6;">Отмена</a>
+            <a href="?section=users" class="btn-action btn-cancel">Отмена</a>
         </form>
     </div>
     <?php
@@ -146,7 +143,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
                         <td>
                             <a class="btn-action btn-edit" href="?section=users&action=edit&id=<?php echo $u['id']; ?>">Изменить</a>
                             <?php if ($u['id'] != $user_id): ?>
-                            <form method="POST" style="display:inline;" onsubmit="return confirm('Удалить пользователя?');">
+                            <form method="POST" class="btn-action-inline" onsubmit="return confirm('Удалить пользователя?');">
                                 <input type="hidden" name="delete_id" value="<?php echo $u['id']; ?>">
                                 <button type="submit" class="btn-action btn-delete">Удалить</button>
                             </form>

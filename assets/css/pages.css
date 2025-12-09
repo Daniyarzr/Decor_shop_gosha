@@ -1,0 +1,79 @@
+.offer-box-span-2 {
+    grid-column: span 2;
+}
+
+.testimonial-card-span-3 {
+    grid-column: span 3;
+    text-align: center;
+}
+
+.review-date {
+    font-size: 12px;
+    color: #777;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-icon {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+.filter-icon {
+    color: #f25081;
+}
+
+.no-products-icon {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.btn-promotion-small {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.promotion-icon {
+    color: #f25081;
+}
+
+.promotion-products-margin {
+    margin-top: 30px;
+}
+
+.product-placeholder {
+    height: 100px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+}
+
+.promotion-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-promotion-xs {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+}
+
+.cart-placeholder {
+    width: 80px;
+    height: 80px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #999;
+}
+

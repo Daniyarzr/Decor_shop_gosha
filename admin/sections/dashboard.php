@@ -1,8 +1,5 @@
 <?php
-// admin/sections/dashboard.php
-
 try {
-    // Статистика
     $stats['products'] = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
     $stats['orders'] = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
     $stats['users'] = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -23,34 +20,34 @@ try {
             <p>Товаров</p>
         </div>
         
-        <div class="stat-card" style="border-left-color: #27ae60;">
+        <div class="stat-card stat-card-success">
             <h3><?php echo $stats['orders'] ?? 0; ?></h3>
             <p>Заказов</p>
         </div>
         
-        <div class="stat-card" style="border-left-color: #f39c12;">
+        <div class="stat-card stat-card-warning">
             <h3><?php echo $stats['users'] ?? 0; ?></h3>
             <p>Пользователей</p>
         </div>
         
-        <div class="stat-card" style="border-left-color: #9b59b6;">
+        <div class="stat-card stat-card-purple">
             <h3><?php echo $stats['pending_orders'] ?? 0; ?></h3>
             <p>Ожидают обработки</p>
         </div>
     </div>
     
     <h3>Быстрые действия</h3>
-    <div class="admin-nav" style="background: transparent; padding: 0;">
+    <div class="admin-nav admin-nav-transparent">
         <?php if ($is_admin): ?>
             <a href="?section=products&action=add" class="btn-add">
                 <i class="fas fa-plus"></i> Добавить товар
             </a>
         <?php endif; ?>
-        <a href="?section=orders" class="btn-add" style="background: #3498db;">
+        <a href="?section=orders" class="btn-add btn-add-blue">
             <i class="fas fa-shopping-cart"></i> Просмотреть заказы
         </a>
         <?php if ($is_admin): ?>
-            <a href="?section=users" class="btn-add" style="background: #f39c12;">
+            <a href="?section=users" class="btn-add btn-add-orange">
                 <i class="fas fa-users"></i> Управление пользователями
             </a>
         <?php endif; ?>

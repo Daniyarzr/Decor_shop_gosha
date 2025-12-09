@@ -3,19 +3,16 @@ session_start();
 require_once '../config.php';
 require_once '../includes/cache.php';
 
-// Версия для кэш-бастинга CSS/JS
 if (!defined('ASSETS_VERSION')) {
     define('ASSETS_VERSION', '1.0.0');
 }
 
-// Получаем фильтры из GET-параметров
 $selected_categories = [];
 $selected_promotions = [];
 $min_price = null;
 $max_price = null;
 $has_discount = false;
 
-// Обработка категорий
 if (isset($_GET['category'])) {
     if (is_array($_GET['category'])) {
         $selected_categories = array_filter(array_map('trim', $_GET['category']));
@@ -27,7 +24,6 @@ if (isset($_GET['category'])) {
     }
 }
 
-// Обработка акций
 if (isset($_GET['promotion'])) {
     if (is_array($_GET['promotion'])) {
         $selected_promotions = array_filter(array_map('intval', $_GET['promotion']), function($v) { return $v > 0; });
@@ -39,7 +35,6 @@ if (isset($_GET['promotion'])) {
     }
 }
 
-// Обработка цены
 if (!empty($_GET['min_price']) && is_numeric($_GET['min_price'])) {
     $min_price = (float)$_GET['min_price'];
 }
@@ -261,220 +256,7 @@ if ($all_categories === null) {
     <title>Каталог товаров — Декор для дома</title>
     <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo ASSETS_VERSION; ?>">
     <link rel="stylesheet" href="../assets/css/catalog.css?v=<?php echo ASSETS_VERSION; ?>">
-    <style>
-        /* Стили для уведомления */
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-        
-        .cart-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .cart-notification.hiding {
-            animation: slideOut 0.3s ease-out forwards;
-        }
-        
-        .cart-count {
-            background: #f25081;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-left: 5px;
-            font-weight: bold;
-        }
-        
-        /* Стили для акций в карточках товаров */
-        .product-badges {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .discount-badge {
-            background: linear-gradient(135deg, #f25081, #ff6b9d);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(242, 80, 129, 0.3);
-            white-space: nowrap;
-        }
-        
-        .promotion-badge {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
-            white-space: nowrap;
-        }
-        
-        .product-card {
-            position: relative;
-        }
-        
-        .product-image {
-            position: relative;
-        }
-        
-        .price-container {
-            margin: 10px 0;
-        }
-        
-        .original-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 14px;
-            margin-right: 8px;
-        }
-        
-        .discounted-price {
-            color: #f25081;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .regular-price {
-            color: #333;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .promotion-info {
-            background: #f9f9f9;
-            border-radius: 5px;
-            padding: 8px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .promotion-info a {
-            color: #f25081;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .promotion-info a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Стили для фильтра акций */
-        .filter-promotions {
-            margin-bottom: 20px;
-        }
-        
-        .filter-promotions label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-        
-        .promotion-discount {
-            background: #f25081;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: auto;
-        }
-        
-        .filter-has-discount {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .filter-has-discount label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-        
-        .filter-has-discount input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .selected-filters {
-            background: #f5f5f5;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        
-        .selected-filters-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        
-        .selected-filter-item {
-            display: inline-block;
-            background: #e0e0e0;
-            padding: 2px 8px;
-            border-radius: 3px;
-            margin: 2px;
-            font-size: 12px;
-        }
-        
-        .clear-all-filters {
-            color: #f25081;
-            text-decoration: none;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .clear-all-filters:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/catalog-inline.css?v=<?php echo ASSETS_VERSION; ?>">
 </head>
 <body>
 
@@ -616,7 +398,7 @@ if ($all_categories === null) {
                     </div>
                     <?php if (!empty($selected_promotions) || $has_discount): ?>
                         <div class="active-promotions-info">
-                            <i class="fas fa-fire" style="color: #f25081;"></i>
+                            <i class="fas fa-fire filter-icon"></i>
                             <?php if ($has_discount): ?>
                                 Показаны товары со скидками
                                 <?php if (!empty($selected_promotions)): ?>
@@ -632,10 +414,10 @@ if ($all_categories === null) {
                 <div class="products-grid">
                     <?php if (empty($products)): ?>
                         <div class="no-products">
-                            <i class="fas fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+                            <i class="fas fa-search no-products-icon"></i>
                             <h3>Товары не найдены</h3>
                             <p>Попробуйте изменить параметры фильтрации</p>
-                            <a href="catalog.php" class="btn-promotion" style="padding: 10px 20px; font-size: 14px;">
+                            <a href="catalog.php" class="btn-promotion btn-promotion-small">
                                 <i class="fas fa-times"></i> Сбросить фильтры
                             </a>
                         </div>
@@ -693,7 +475,7 @@ if ($all_categories === null) {
                                     <!-- Информация об акциях -->
                                     <?php if (!empty($product['promotion_info'])): ?>
                                         <div class="promotion-info">
-                                            <i class="fas fa-gift" style="color: #f25081;"></i>
+                                            <i class="fas fa-gift promotion-icon"></i>
                                             <?php 
                                             $promo_count = count($product['promotion_info']);
                                             if ($promo_count == 1) {
@@ -735,8 +517,8 @@ if ($all_categories === null) {
             const notification = document.createElement('div');
             notification.className = 'cart-notification';
             notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <svg style="width: 20px; height: 20px; fill: white;" viewBox="0 0 24 24">
+                <div class="notification-content">
+                    <svg class="notification-icon" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                     </svg>
                     <span>${message}</span>

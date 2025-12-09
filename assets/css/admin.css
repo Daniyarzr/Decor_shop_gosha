@@ -1,0 +1,119 @@
+.btn-cancel {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-action-inline {
+    display: inline;
+}
+
+.form-inline-flex {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.select-min-width {
+    min-width: 120px;
+}
+
+.select-min-width-large {
+    min-width: 130px;
+}
+
+.order-details-row {
+    display: none;
+    background: #f8f9fa;
+}
+
+.table-container-margin {
+    margin-top: 10px;
+}
+
+.table-margin-zero {
+    margin: 0;
+}
+
+.margin-top-small {
+    margin-top: 10px;
+}
+
+.margin-bottom-medium {
+    margin-bottom: 30px;
+}
+
+.form-inline-block {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.status-expired {
+    color: #e74c3c;
+}
+
+.status-active {
+    color: #27ae60;
+}
+
+.nav-btn-success {
+    background: #27ae60;
+}
+
+.nav-btn-danger {
+    background: #e74c3c;
+}
+
+.category-new-input {
+    margin-top: 5px;
+}
+
+.product-image-admin {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.tag-badge {
+    background: #eee;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.stat-card-success {
+    border-left-color: #27ae60;
+}
+
+.stat-card-warning {
+    border-left-color: #f39c12;
+}
+
+.stat-card-purple {
+    border-left-color: #9b59b6;
+}
+
+.admin-nav-transparent {
+    background: transparent;
+    padding: 0;
+}
+
+.btn-add-blue {
+    background: #3498db;
+}
+
+.btn-add-orange {
+    background: #f39c12;
+}
+
+.hr-margin {
+    margin: 20px 0;
+}
+
+.select-multiple {
+    height: auto;
+}
+

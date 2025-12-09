@@ -1,15 +1,11 @@
 <?php
-// admin/sections/sliders.php
-
 $current_action = $action ?: 'list';
 
-// Только администратор может управлять слайдерами
 if (!$is_admin) {
     echo "<div class='content-card'><div class='alert alert-danger'>Доступ только для администратора</div></div>";
     return;
 }
 
-// Удаление
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     try {
@@ -21,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     }
 }
 
-// Сохранение
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_slider'])) {
     $tag = trim($_POST['tag']);
     $tag_class = trim($_POST['tag_class']);
@@ -117,7 +112,7 @@ if ($current_action === 'add' || $current_action === 'edit') {
                 <label><input type="checkbox" name="is_active" <?php echo $slider['is_active'] ? 'checked' : ''; ?>> Активен</label>
             </div>
             <button type="submit" name="save_slider" class="btn-submit"><?php echo $id ? 'Сохранить' : 'Создать'; ?></button>
-            <a href="?section=sliders" class="btn-action" style="background:#95a5a6;">Отмена</a>
+            <a href="?section=sliders" class="btn-action btn-cancel">Отмена</a>
         </form>
     </div>
     <?php
@@ -153,14 +148,14 @@ if ($current_action === 'add' || $current_action === 'edit') {
                     <?php foreach ($sliders as $s): ?>
                     <tr>
                         <td><?php echo $s['id']; ?></td>
-                        <td><span style="background:#eee;padding:3px 6px;border-radius:4px;"><?php echo htmlspecialchars($s['tag']); ?></span></td>
+                        <td><span class="tag-badge"><?php echo htmlspecialchars($s['tag']); ?></span></td>
                         <td><?php echo htmlspecialchars(mb_substr($s['title'],0,50)); ?></td>
                         <td><?php echo htmlspecialchars($s['button_link']); ?></td>
                         <td><?php echo $s['sort_order']; ?></td>
                         <td><?php echo $s['is_active'] ? 'Да' : 'Нет'; ?></td>
                         <td>
                             <a class="btn-action btn-edit" href="?section=sliders&action=edit&id=<?php echo $s['id']; ?>">Изменить</a>
-                            <form method="POST" style="display:inline;" onsubmit="return confirm('Удалить слайд?');">
+                            <form method="POST" class="btn-action-inline" onsubmit="return confirm('Удалить слайд?');">
                                 <input type="hidden" name="delete_id" value="<?php echo $s['id']; ?>">
                                 <button type="submit" class="btn-action btn-delete">Удалить</button>
                             </form>

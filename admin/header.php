@@ -1,5 +1,4 @@
 <?php
-// admin/header.php
 require_once 'auth_check.php';
 ?>
 <!DOCTYPE html>
@@ -9,13 +8,8 @@ require_once 'auth_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель | Decor Shop</title>
     
-    <!-- Bootstrap 5 (опционально) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Ваши стили -->
     <link rel="stylesheet" href="../assets/css/admin.css">
-    
-    <!-- Font Awesome для иконок -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
