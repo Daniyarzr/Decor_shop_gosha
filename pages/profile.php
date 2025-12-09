@@ -54,6 +54,11 @@ if (!empty($orders)) {
     }
 }
 
+// Отзывы пользователя
+$reviews_stmt = $pdo->prepare("SELECT * FROM reviews WHERE user_id = ? ORDER BY created_at DESC");
+$reviews_stmt->execute([$user_id]);
+$user_reviews = $reviews_stmt->fetchAll();
+
 // Обработка обновления профиля
 $message = '';
 $message_type = ''; // success или error
@@ -124,8 +129,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+    } elseif (isset($_POST['add_review'])) {
+        $review_text = trim($_POST['review_text'] ?? '');
+        $rating = (int)($_POST['rating'] ?? 5);
+        if ($rating < 1) $rating = 1;
+        if ($rating > 5) $rating = 5;
+
+        if ($review_text === '') {
+            $message = 'Текст отзыва не может быть пустым.';
+            $message_type = 'error';
+        } else {
+            try {
+                $stmt = $pdo->prepare("INSERT INTO reviews (user_id, name, email, text, rating, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+                $stmt->execute([$user_id, $user['username'], $user['email'], $review_text, $rating]);
+                $message = 'Спасибо! Отзыв отправлен на модерацию.';
+                $message_type = 'success';
+                // Обновим список
+                $reviews_stmt->execute([$user_id]);
+                $user_reviews = $reviews_stmt->fetchAll();
+            } catch (PDOException $e) {
+                $message = 'Ошибка при сохранении отзыва: ' . $e->getMessage();
+                $message_type = 'error';
+            }
+        }
     }
 }
+
+$user_id = $_SESSION['user_id'];
+$user_role = $_SESSION['role'] ?? $_SESSION['user_role'] ?? 'user';
 ?>
 
 <!DOCTYPE html>
@@ -427,7 +458,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <aside class="profile-sidebar">
                 <ul class="profile-menu">
                     <li><a href="#profile" class="active">Мой профиль</a></li>
+                    <?php if ($user_role === 'admin' || $user_role === 'moderator'): ?>
+                        <li>
+                            <a href="/admin/index.php" class="btn-admin-link">
+                                <i class="fas fa-cog"></i> Перейти в админ-панель
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <li><a href="#orders">История заказов</a></li>
+                    <li><a href="#reviews">Мои отзывы</a></li>
                     <li><a href="logout.php">Выход</a></li>
                 </ul>
             </aside>
@@ -536,6 +575,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Вкладка отзывов -->
+                <div id="reviews" style="display: none;">
+                    <h2 class="section-title">Мои отзывы</h2>
+                    <p style="color:#666; margin-bottom:15px;">Оставьте отзыв о покупках или сервисе. Отзывы проходят модерацию.</p>
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="rating">Оценка</label>
+                            <select id="rating" name="rating" class="form-control" style="max-width:200px;">
+                                <?php for ($i=5; $i>=1; $i--): ?>
+                                    <option value="<?= $i ?>"><?= $i ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="review_text">Ваш отзыв</label>
+                            <textarea id="review_text" name="review_text" class="form-control" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" name="add_review" class="btn">Отправить отзыв</button>
+                    </form>
+
+                    <h3 class="section-title" style="margin-top:30px;">История ваших отзывов</h3>
+                    <?php if (empty($user_reviews)): ?>
+                        <div class="no-orders" style="padding:20px;">Пока нет отзывов.</div>
+                    <?php else: ?>
+                        <div class="orders-list">
+                            <?php foreach ($user_reviews as $rev): ?>
+                                <div class="order-card">
+                                    <div class="order-header">
+                                        <div>
+                                            <div class="order-number">Оценка: <?= (int)$rev['rating']; ?>/5</div>
+                                            <div class="order-date"><?= date('d.m.Y H:i', strtotime($rev['created_at'])); ?></div>
+                                        </div>
+                                        <div>
+                                            <span class="order-status status-<?= htmlspecialchars($rev['status']); ?>">
+                                                <?= htmlspecialchars($rev['status']); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="order-details">
+                                        <?= nl2br(htmlspecialchars($rev['text'])); ?>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>

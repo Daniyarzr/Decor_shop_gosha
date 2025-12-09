@@ -24,6 +24,9 @@ try {
     $slides = [];
     error_log("Ошибка при загрузке слайдов: " . $e->getMessage());
 }
+
+
+
 ?>
 
 

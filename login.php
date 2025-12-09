@@ -19,14 +19,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once 'config.php';
 
         // Ищем пользователя по логину ИЛИ email
-        $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
+        // Берём все нужные поля, чтобы сразу положить их в сессию
+        $stmt = $pdo->prepare("SELECT id, username, email, role, password FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$login, $login]);
         $user = $stmt->fetch();
 
+       // В блоке после успешной проверки пароля:
         if ($user && password_verify($password, $user['password'])) {
             // Авторизация успешна
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];      // ключ используется в admin/auth_check.php
+            $_SESSION['user_role'] = $user['role']; // резервный ключ, который читается в profile.php
+            $_SESSION['logged_in'] = true;
+            $_SESSION['login_time'] = time();
+            
             header('Location: index.php');
             exit;
         } else {
